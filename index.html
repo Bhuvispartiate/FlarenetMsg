@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlarenetMsg — WhatsApp Gateway</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-box">
+      <div class="brand-group center-brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">FlarenetMsg</span>
+          <span class="brand-badge">Admin</span>
+        </div>
+      </div>
+      <h2 class="login-title">Sign In</h2>
+      <div class="form-group">
+        <label class="input-label" for="login-username">Username</label>
+        <input id="login-username" class="text-input" type="text" placeholder="Enter your username" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label class="input-label" for="login-password">Password</label>
+        <input id="login-password" class="text-input" type="password" placeholder="Enter your password" autocomplete="off" />
+      </div>
+      <button class="btn-submit" onclick="performLogin()">
+        Sign In
+      </button>
+      <div id="login-error-msg" class="alert-box error hidden"></div>
+    </div>
+  </div>
+
+  <div id="dashboard-content" class="hidden">
+
+  <!-- Top Navbar with 3 Main Navigation Pages -->
+  <header class="top-nav">
+    <div class="nav-container">
+      <div class="brand-group" onclick="switchPage('instances')" style="cursor: pointer;">
+        <div class="brand-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">FlarenetMsg</span>
+          <span class="brand-badge">Gateway</span>
+        </div>
+      </div>
+
+      <!-- 3 Primary Navigation Tabs -->
+      <nav class="top-nav-links">
+        <button class="top-nav-btn active" id="nav-btn-instances" onclick="switchPage('instances')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          Instances
+        </button>
+        <button class="top-nav-btn" id="nav-btn-send" onclick="switchPage('send')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Send Message
+        </button>
+        <button class="top-nav-btn" id="nav-btn-logs" onclick="switchPage('logs')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Message Logs
+        </button>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn-primary-action" onclick="openConnectModal()">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Instance
+        </button>
+        <button class="btn-subtle" onclick="performLogout()" style="margin-left: 12px; color: #ff6b6b; border-color: rgba(255, 107, 107, 0.2);">
+          Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-container">
+
+    <!-- Page 1: Instances -->
+    <div class="view-panel" id="page-instances">
+      <div class="page-top-bar">
+        <div>
+          <h1 class="page-title">Instances</h1>
+          <p class="page-desc">All connected WhatsApp instances available for messaging.</p>
+        </div>
+      </div>
+
+      <div class="table-toolbar">
+        <div class="toolbar-stat" id="instances-count-label">Loading instances…</div>
+        <button class="btn-subtle" id="refresh-btn" onclick="loadInstances()">
+          <svg id="refresh-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Refresh
+        </button>
+      </div>
+
+      <div id="instances-loading" class="loading-state">
+        <div class="spinner-ring"></div>
+        <span>Fetching instance status…</span>
+      </div>
+
+      <div id="instances-empty" class="empty-state hidden">
+        <div class="empty-icon-wrap">
+          <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        </div>
+        <h3>No Instances Connected</h3>
+        <p>Create your first instance to start broadcasting messages via WhatsApp.</p>
+        <button class="btn-primary-action" onclick="openConnectModal()">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Connect Instance
+        </button>
+      </div>
+
+      <div id="instances-grid" class="instances-grid hidden"></div>
+    </div>
+
+    <!-- Page 2: Send Message -->
+    <div class="view-panel hidden" id="page-send">
+      <div class="form-wrapper">
+        <div class="form-header">
+          <h1 class="page-title">Send Message</h1>
+          <p class="page-desc">Send a WhatsApp message directly using any connected instance.</p>
+        </div>
+
+          <!-- Custom Stylish Instance Selection Dropdown -->
+          <div class="form-group">
+            <label class="input-label">Select WhatsApp Instance</label>
+            <div class="custom-dropdown" id="send-instance-dropdown">
+              <button type="button" class="custom-dropdown-trigger" id="send-instance-trigger" onclick="toggleDropdown('send-instance-dropdown')">
+                <div class="dropdown-selected-content">
+                  <div class="dropdown-icon-box">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                  </div>
+                  <div class="dropdown-text-group">
+                    <span class="dropdown-selected-title" id="send-dropdown-title">Choose an instance...</span>
+                    <span class="dropdown-selected-sub" id="send-dropdown-sub">Select an instance to route this message</span>
+                  </div>
+                </div>
+                <div class="dropdown-chevron">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+              </button>
+              <div class="custom-dropdown-menu hidden" id="send-instance-menu"></div>
+              <input type="hidden" id="send-instance-select" value="" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="input-label" for="phone-number">Recipient Mobile Number</label>
+            <div class="input-phone-container">
+              <span class="country-prefix">+91</span>
+              <input id="phone-number" class="text-input phone-input" type="text" placeholder="9876543210" autocomplete="off" maxlength="10" />
+            </div>
+            <span class="input-hint">Enter 10-digit Indian mobile number</span>
+          </div>
+
+          <div class="form-group">
+            <label class="input-label" for="message-text">Message Content</label>
+            <textarea id="message-text" class="text-input message-area" rows="6" placeholder="Write your message here..."></textarea>
+          </div>
+
+          <button class="btn-submit" id="send-btn" onclick="sendMessage()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Send WhatsApp Message
+          </button>
+          
+          <div id="send-status" class="alert-box hidden"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page 3: Message Logs -->
+    <div class="view-panel hidden" id="page-logs">
+      <div class="page-top-bar">
+        <div>
+          <h1 class="page-title">Message Logs</h1>
+          <p class="page-desc">A record of messages dispatched to WhatsApp.</p>
+        </div>
+
+        <!-- Stylish Filter Dropdown -->
+        <div class="logs-filter-group">
+          <label class="filter-label">Filter:</label>
+          <div class="custom-dropdown filter-dropdown" id="logs-filter-dropdown">
+            <button type="button" class="custom-dropdown-trigger filter-trigger" id="logs-filter-trigger" onclick="toggleDropdown('logs-filter-dropdown')">
+              <span id="logs-filter-title">All Instances</span>
+              <div class="dropdown-chevron">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+            </button>
+            <div class="custom-dropdown-menu filter-menu hidden" id="logs-filter-menu"></div>
+            <input type="hidden" id="logs-instance-filter" value="ALL" />
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Instance</th>
+              <th>Recipient</th>
+            </tr>
+          </thead>
+          <tbody id="logs-tbody">
+            <tr>
+              <td colspan="3" class="table-empty-row">Connecting to live logs...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Connect Instance Modal -->
+  <div id="connect-modal" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <div class="modal-top">
+        <div class="modal-title-wrap">
+          <div class="modal-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+          </div>
+          <h3>Connect New Instance</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeConnectModal()">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-content-area">
+        <!-- Step 1: Name Entry -->
+        <div id="modal-step-name" class="modal-step">
+          <p class="modal-instructions">Provide an instance identifier to generate a pairing QR code for WhatsApp.</p>
+          
+          <div class="form-group">
+            <label class="input-label" for="instance-name">Instance Name</label>
+            <input id="instance-name" class="text-input" type="text" placeholder="e.g. support-line-1" autocomplete="off" />
+          </div>
+
+          <div class="form-group">
+            <label class="input-label" for="instance-api-key">Custom API Key</label>
+            <input id="instance-api-key" class="text-input" type="text" placeholder="e.g. my-secret-key-123" autocomplete="off" />
+            <p class="field-hint" style="font-size: 0.8rem; color: #a1a1aa; margin-top: 4px;">Used for external integrations. Required.</p>
+          </div>
+
+          <button class="btn-submit" id="connect-btn" onclick="connectInstance()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Generate QR Code
+          </button>
+          <div id="error-msg" class="alert-box error hidden"></div>
+        </div>
+
+        <!-- Step 2: QR Scanning -->
+        <div id="modal-step-qr" class="modal-step hidden">
+          <div class="instance-name-chip">
+            <div class="chip-info">
+              <span class="chip-label">Instance</span>
+              <strong id="qr-modal-instance-name">—</strong>
+            </div>
+            <button class="btn-chip-action" onclick="resetModalToStep1()">Change Name</button>
+          </div>
+
+          <div id="qr-loader" class="qr-loading-block hidden">
+            <div class="spinner-ring"></div>
+            <span>Generating QR code...</span>
+          </div>
+
+          <div id="qr-result" class="qr-result-block hidden">
+            <div class="qr-code-box">
+              <img id="qr-image" src="" alt="WhatsApp QR Code" />
+            </div>
+
+            <div class="scan-steps-guide">
+              <span class="step-pill">1. Open WhatsApp</span>
+              <span class="step-arrow">→</span>
+              <span class="step-pill">2. Linked Devices</span>
+              <span class="step-arrow">→</span>
+              <span class="step-pill">3. Scan QR</span>
+            </div>
+
+            <div class="qr-listening-pulse">
+              <span class="pulse-indicator"></span>
+              Waiting for device to connect...
+            </div>
+
+            <button class="btn-secondary-action" onclick="proceedToSend()">
+              I've scanned &mdash; Go to Send Message
+            </button>
+          </div>
+    </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+.env
+logs/
+logs/*
+build/
+*.prof
+coverage.*
+.air.toml
+.idea/
+.vscode/
+.DS_Store
+
+# Binaries & compiled artifacts (root only)
+*.exe
+/server
+/evolution-go
+/oxis-whatsapp
+/oxis-whatsapp.exe
+
+# Local data & databases
+dbdata/
+dbdata/*
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
