@@ -1,0 +1,22 @@
+services:
+  whatsapp-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: whatsapp-automation
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - path: .env
+        required: false
+      - path: ./api/.env
+        required: false
+    environment:
+      - PORT=8080
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
